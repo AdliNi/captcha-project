@@ -1,35 +1,56 @@
 document.addEventListener("DOMContentLoaded", () => {
   let currentCaptchaId = null;
+  let captchaToken = null;
   let captchaStartTime = null;
   let mouseMovements = [];
 
   // Track mouse movement
   document.addEventListener("mousemove", (e) => {
-    const time = Date.now();
     mouseMovements.push({
       x: e.clientX,
       y: e.clientY,
-      t: time
+      t: Date.now()
     });
   });
 
-  // Get query parameter returnUrl
-  function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
+  const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+
+  // Display question if already stored
+  const cachedCaptcha = sessionStorage.getItem("captchaQuestion");
+  if (cachedCaptcha) {
+    const data = JSON.parse(cachedCaptcha);
+    displayCaptcha(data);
+  } else {
+    fetch("http://localhost/captcha-extension/get-captcha.php")
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          console.error("CAPTCHA fetch error:", data.message);
+          return;
+        }
+
+        if (data.type === "puzzle") {
+          // Redirect if wrong type
+          window.location.href = "captcha-puzzle.html?returnUrl=" + encodeURIComponent(returnUrl);
+        } else if (!data.question || !data.id || !data.token) {
+          console.error("Incomplete CAPTCHA data", data);
+        } else {
+          sessionStorage.setItem("captchaQuestion", JSON.stringify(data));
+          displayCaptcha(data);
+        }
+      })
+      .catch(err => {
+        console.error("Fetch error:", err);
+        document.getElementById("message").textContent = "⚠️ Failed to load CAPTCHA. Try refreshing.";
+      });
   }
 
-  const returnUrl = getQueryParam('returnUrl') || '/';
-
-  // Fetch CAPTCHA question from PHP backend
-  fetch("http://localhost/captcha-extension/get-captcha.php")
-    .then(res => res.json())
-    .then(data => {
-      currentCaptchaId = data.id;
-      document.getElementById("captchaQuestion").innerText = data.question;
-      // Start the timer
-      captchaStartTime = Date.now();
-    });
+  function displayCaptcha(data) {
+    document.getElementById("captchaQuestion").innerText = data.question;
+    currentCaptchaId = data.id;
+    captchaToken = data.token;
+    captchaStartTime = Date.now();
+  }
 
   function checkCaptcha() {
     const answer = document.getElementById('captchaAnswer').value.trim();
@@ -43,30 +64,40 @@ document.addEventListener("DOMContentLoaded", () => {
         captcha_id: currentCaptchaId,
         user_answer: answer,
         time_taken: timeTaken,
-        mouse_data: mouseMovements 
+        mouse_data: mouseMovements,
+        token: captchaToken
       })
     })
     .then(res => res.json())
     .then(result => {
       if (result.success) {
         messageEl.style.color = 'green';
-        messageEl.textContent = 'CAPTCHA passed! Redirecting...';
-        setTimeout(() => {
-          window.location.href = decodeURIComponent(returnUrl);
-        }, 1000);
+        messageEl.textContent = '✅ CAPTCHA passed! Redirecting...';
+        sessionStorage.setItem("captchaPassed", "true");
+        sessionStorage.removeItem("captchaRequired");
+        sessionStorage.removeItem("captchaQuestion"); // Clear used CAPTCHA
+        
+        if (returnUrl) {
+        window.location.href = decodeURIComponent(returnUrl);
+        } else {
+        window.history.back(); // fallback to previous page
+        }
+
       } else {
         messageEl.style.color = 'red';
-        messageEl.textContent = 'Incorrect answer. Please try again.';
+        messageEl.textContent = '❌ ' + result.message;
       }
+      
     })
     .catch((err) => {
-      console.error("Fetch error:", err);
+      console.error("Validation error:", err);
       messageEl.style.color = 'red';
-      messageEl.textContent = 'Error validating CAPTCHA. Please try again.';
+      messageEl.textContent = '⚠️ Error validating CAPTCHA. Please try again.';
     });
   }
 
-  document.getElementById('submitBtn').addEventListener('click', () => {
+  document.getElementById('submitBtn').addEventListener('click', (e) => {
+    e.preventDefault();
     checkCaptcha();
   });
 
@@ -76,4 +107,5 @@ document.addEventListener("DOMContentLoaded", () => {
       checkCaptcha();
     }
   });
+
 });

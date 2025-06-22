@@ -1,5 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
   let captchaToken = null;
+  let startTime = Date.now();
+  let mouseMovements = [];
+
+  // Track mouse movement
+  document.addEventListener("mousemove", (e) => {
+    mouseMovements.push({
+      x: e.clientX,
+      y: e.clientY,
+      t: Date.now()
+    });
+
+    // Limit to last 300 points
+    if (mouseMovements.length > 300) {
+      mouseMovements.shift();
+    }
+  });
 
   async function getPuzzleDataFromDB() {
     const response = await fetch("get-captcha.php");
@@ -11,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     captchaToken = data.token;
+    startTime = Date.now();
     return data.pieces;
   }
 
@@ -69,13 +86,16 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("verify-btn").addEventListener("click", async () => {
     const imgs = [...document.getElementById("puzzle-container").children];
     const order = imgs.map(img => img.src.split('/').pop());
+    const timeTaken = Date.now() - startTime;
 
     const response = await fetch("validate-puzzle.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token: captchaToken,
-        order: order.map(piece => `puzzle/${piece}`)
+        order: order.map(piece => `puzzle/${piece}`),
+        time_taken: timeTaken,
+        mouse_path: mouseMovements
       })
     });
 
@@ -83,9 +103,18 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(result);
 
     if (result.success) {
-      const returnUrl = new URLSearchParams(window.location.search).get("returnUrl") || "index.html";
+      sessionStorage.setItem("captchaPassed", "true");
+      sessionStorage.removeItem("captchaRequired");
+      sessionStorage.removeItem("captchaTriggered"); 
+
+      const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+
       alert("✅ Verified! Redirecting...");
-      window.location.href = returnUrl;
+      if (returnUrl) {
+        window.location.href = decodeURIComponent(returnUrl);
+      } else {
+        window.history.back(); // fallback to previous page
+      }
     } else {
       alert("❌ " + result.message);
     }
