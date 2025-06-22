@@ -80,9 +80,15 @@
     return suspiciousMouse || suspiciousTyping || suspiciousScroll;
   }
 
- function triggerCaptcha() {
-    const returnUrl = encodeURIComponent(window.location.href);
-    window.location.href = captcha-question.html?returnUrl=${returnUrl};
+  function triggerCaptcha() {
+  const returnUrl = encodeURIComponent(window.location.href);
+
+  // Randomly choose between the two CAPTCHA types
+  const pages = ["captcha-question.html", "captcha-puzzle.html"];
+  const selectedPage = pages[Math.floor(Math.random() * pages.length)];
+
+  // Redirect to selected CAPTCHA page with return URL
+  window.location.href = `${selectedPage}?returnUrl=${returnUrl}`;
 }
 
 
