@@ -89,8 +89,7 @@
 
   // Redirect to selected CAPTCHA page with return URL
   window.location.href = `${selectedPage}?returnUrl=${returnUrl}`;
-}
-
+  }
 
   // Mouse move
   document.addEventListener("mousemove", (e) => {
