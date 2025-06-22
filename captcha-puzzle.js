@@ -1,20 +1,25 @@
-const pieces = [
-  "puzzle/piece1.png",
-  "puzzle/piece2.png",
-  "puzzle/piece3.png",
-  "puzzle/piece4.png",
-  "puzzle/piece5.png",
-  "puzzle/piece6.png",
-  "puzzle/piece7.png",
-  "puzzle/piece8.png",
-  "puzzle/piece9.png"
-];
+
+async function getPuzzleDataFromDB() {
+  const response = await fetch("get-captcha.php");
+  const data = await response.json();
+
+  if (data.type !== "puzzle") {
+    alert("Error: Expected a puzzle CAPTCHA but got something else.");
+    window.location.href = "captcha-question.html"; // fallback
+    return null;
+  }
+
+  return data.pieces;
+}
 
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
 }
 
-function loadPuzzle() {
+async function loadPuzzle() {
+  const pieces = await getPuzzleDataFromDB();
+  if (!pieces) return; // exit if no puzzle pieces
+
   const container = document.getElementById("puzzle-container");
   const shuffled = shuffle([...pieces]);
 
@@ -34,24 +39,22 @@ function loadPuzzle() {
       e.preventDefault();
       const fromIndex = e.dataTransfer.getData("text/plain");
       const toIndex = img.dataset.index;
-      const container = document.getElementById("puzzle-container");
       const fromImg = container.children[fromIndex];
       const toImg = container.children[toIndex];
 
-      // Swap the two images in the DOM
-      const fromNextSibling = fromImg.nextSibling;
-      const toNextSibling = toImg.nextSibling;
+      const fromNext = fromImg.nextSibling;
+      const toNext = toImg.nextSibling;
 
-      if (fromNextSibling === toImg) {
+      if (fromNext === toImg) {
         container.insertBefore(toImg, fromImg);
-      } else if (toNextSibling === fromImg) {
+      } else if (toNext === fromImg) {
         container.insertBefore(fromImg, toImg);
       } else {
-        container.insertBefore(fromImg, toNextSibling);
-        container.insertBefore(toImg, fromNextSibling);
+        container.insertBefore(fromImg, toNext);
+        container.insertBefore(toImg, fromNext);
       }
 
-      // Update dataset indices after swap
+      // Update index data
       Array.from(container.children).forEach((child, idx) => {
         child.dataset.index = idx;
       });
@@ -63,8 +66,9 @@ function loadPuzzle() {
 
 document.getElementById("verify-btn").addEventListener("click", () => {
   const imgs = [...document.getElementById("puzzle-container").children];
-  const correct = imgs.every((img, i) => img.src.includes(piece${i + 1}));
+  const correct = imgs.every((img, i) => img.src.includes(`piece${i + 1}`));
   alert(correct ? "Verified as human!" : "Try again.");
 });
 
 loadPuzzle();
+
