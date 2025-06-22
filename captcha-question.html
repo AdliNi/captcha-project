@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CAPTCHA Challenge</title>
+  <link rel="stylesheet" href="captcha-question.css" />
+  <style>
+    body { font-family: sans-serif; padding: 10px; width: 300px; }
+    .message { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h3>CAPTCHA Challenge</h3>
+  <div>
+    <label id="captchaQuestion">Loading question...</label><br>
+    <input type="text" id="captchaAnswer" /><br>
+    <button id="submitBtn">Submit</button>
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    // Parse returnUrl from query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('returnUrl');
+  </script>
+  <script src="captcha-question.js"></script>
+ </body>
+</html>

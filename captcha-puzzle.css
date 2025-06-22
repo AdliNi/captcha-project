@@ -1,0 +1,19 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+  margin: 20px;
+}
+
+#puzzle-container {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-gap: 5px;
+  justify-content: center;
+}
+
+#puzzle-container img {
+  width: 100px;
+  height: 100px;
+  cursor: move;
+  border: 1px solid #ccc;
+}

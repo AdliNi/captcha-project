@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Activity Tracker CAPTCHA",
+  "version": "1.0",
+  "description": "Tracks human behavior and triggers CAPTCHA on suspicious activity.",
+  "permissions": ["scripting", "tabs", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
