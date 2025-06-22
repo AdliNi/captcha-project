@@ -63,7 +63,7 @@ function loadPuzzle() {
 
 document.getElementById("verify-btn").addEventListener("click", () => {
   const imgs = [...document.getElementById("puzzle-container").children];
-  const correct = imgs.every((img, i) => img.src.includes(`piece${i + 1}`));
+  const correct = imgs.every((img, i) => img.src.includes(piece${i + 1}));
   alert(correct ? "Verified as human!" : "Try again.");
 });
 
