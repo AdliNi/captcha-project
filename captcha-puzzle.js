@@ -3,27 +3,21 @@ document.addEventListener("DOMContentLoaded", () => {
   let startTime = Date.now();
   let mouseMovements = [];
 
-  // Track mouse movement
   document.addEventListener("mousemove", (e) => {
-    mouseMovements.push({
-      x: e.clientX,
-      y: e.clientY,
-      t: Date.now()
+    mouseMovements.push({ 
+      x: e.clientX, 
+      y: e.clientY, 
+      t: Date.now() 
     });
-
-    // Limit to last 300 points
-    if (mouseMovements.length > 300) {
-      mouseMovements.shift();
-    }
+    if (mouseMovements.length > 300) mouseMovements.shift();
   });
 
   async function getPuzzleDataFromDB() {
-    const response = await fetch("get-captcha.php");
+    const response = await fetch("get-puzzle.php");
     const data = await response.json();
 
     if (data.type !== "puzzle") {
-      window.location.href = "captcha-question.html";
-      return null;
+      return;
     }
 
     captchaToken = data.token;
@@ -100,12 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const result = await response.json();
-    console.log(result);
-
     if (result.success) {
-      sessionStorage.setItem("captchaPassed", "true");
+      sessionStorage.removeItem("captchaInProgress");
       sessionStorage.removeItem("captchaRequired");
-      sessionStorage.removeItem("captchaTriggered"); 
 
       const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
 
@@ -113,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (returnUrl) {
         window.location.href = decodeURIComponent(returnUrl);
       } else {
-        window.history.back(); // fallback to previous page
+        window.history.back();
       }
     } else {
       alert("❌ " + result.message);

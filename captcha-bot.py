@@ -3,28 +3,31 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
 import time
+import os
 
 # === CONFIG ===
 url = "http://localhost/captcha-extension/DummyPage.html"
-extension_path = r"C:/xampp/htdocs/captcha-extension"  # Unpacked extension folder
+extension_path = os.path.abspath(r"C:/xampp/htdocs/captcha-extension")  # ✅ Make sure it's absolute
 
 # === Setup Chrome with Unpacked Extension ===
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_argument(f"--load-extension={extension_path}")
-options.add_argument("--remote-debugging-port=0")  # Avoid DevToolsActivePort crash
-
-# Optional: open devtools or start maximized for visibility
 options.add_argument("--start-maximized")
+# options.add_argument("--headless")  # ❌ Do NOT use headless if testing extension
 
-# === Launch Browser ===
-print("🚀 Launching Chrome with extension unpacked...")
-driver = webdriver.Chrome(service=Service("chromedriver.exe"), options=options)
+# === Start Chrome Driver ===
+print("🚀 Launching Chrome with extension...")
+service = Service("chromedriver.exe")  # ✅ Ensure chromedriver matches your Chrome version
+driver = webdriver.Chrome(service=service, options=options)
 
-# === Navigate to Dummy Page ===
+# === Allow time for extension to load ===
+time.sleep(2)
+
+# === Navigate to test page ===
 print("🔍 Navigating to:", url)
 driver.get(url)
-time.sleep(2)  # Wait for page and extension to load
+time.sleep(2)
 
 # === Simulate Bot-Like Behavior ===
 try:
@@ -42,18 +45,19 @@ try:
     body.click()
     for char in "botinputtext":
         body.send_keys(char)
-        time.sleep(0.01)  # Fast typing
+        time.sleep(0.01)  # 🕒 Typing too fast, bot-like
 
     print("📜 Simulating fast scrolling...")
     for _ in range(15):
         driver.execute_script("window.scrollBy(0, 500);")
-        time.sleep(0.05)
+        time.sleep(0.05)  # Very fast scroll
 
 except Exception as e:
     print("❌ Bot simulation error:", e)
 
-# === Wait & Monitor ===
-print("✅ Bot test completed. Waiting to observe CAPTCHA...")
+# === Monitor the result ===
+print("✅ Bot test completed. Waiting to observe CAPTCHA trigger...")
 print("🌐 Current page:", driver.current_url)
 time.sleep(60)
+
 driver.quit()

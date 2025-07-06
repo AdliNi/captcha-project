@@ -2,21 +2,22 @@
   const currentPage = window.location.pathname;
 
   const isCaptchaPage =
-    currentPage.includes("captcha-question.html") ||
+    currentPage.includes("captcha-text.html") ||
     currentPage.includes("captcha-puzzle.html");
 
-  // 🔒 Block access if CAPTCHA required and not passed, unless already on CAPTCHA page
+  // === Config ===
+  const MAX_LINEARITY = 0.95;
+  const MIN_TYPING_INTERVAL = 50;
+  const MAX_TYPING_INTERVAL = 1000;
+  const MAX_SCROLL_SPEED = 2.0;
+
+  // === Skip CAPTCHA if already on CAPTCHA page ===
   if (!isCaptchaPage &&
       sessionStorage.getItem("captchaRequired") === "true" &&
-      sessionStorage.getItem("captchaPassed") !== "true") {
-    
-    const returnUrl = encodeURIComponent(window.location.href);
-    const pages = ["captcha-question.html", "captcha-puzzle.html"];
-    const selectedPage = pages[Math.floor(Math.random() * pages.length)];
+      sessionStorage.getItem("captchaInProgress") !== "true") {
 
-    history.replaceState({}, "", window.location.href); // clean history
-    window.location.replace(`${selectedPage}?returnUrl=${returnUrl}`);
-    return; // stop script execution
+    triggerCaptcha(); // fetch-based redirect
+    return;
   }
 
   // === Behavior Tracking ===
@@ -26,11 +27,6 @@
   let lastKeyTime = 0;
   let typingStartTime = 0;
   let totalTypedChars = 0;
-
-  const MAX_LINEARITY = 0.95;
-  const MIN_TYPING_INTERVAL = 50;
-  const MAX_TYPING_INTERVAL = 1000;
-  const MAX_SCROLL_SPEED = 2.0;
 
   function calculateLinearity(points) {
     if (points.length < 3) return 0;
@@ -79,29 +75,40 @@
     const suspiciousScroll = analyzeScrolling();
 
     console.log("[Detection] Linearity:", linearity.toFixed(3),
-                "| Typing:", suspiciousTyping,
-                "| Scroll:", suspiciousScroll);
+      "| Typing:", suspiciousTyping,
+      "| Scroll:", suspiciousScroll);
 
     return suspiciousMouse || suspiciousTyping || suspiciousScroll;
   }
 
   function triggerCaptcha() {
-  if (sessionStorage.getItem("captchaTriggered") === "true") return;
+    if (sessionStorage.getItem("captchaInProgress") === "true") return;
 
-  sessionStorage.setItem("captchaTriggered", "true");
-  sessionStorage.setItem("captchaRequired", "true");
-  sessionStorage.removeItem("captchaPassed");
+    sessionStorage.setItem("captchaInProgress", "true");
+    sessionStorage.setItem("captchaRequired", "true");
 
-  const returnUrl = encodeURIComponent(window.location.href);
-  const pages = ["captcha-question.html", "captcha-puzzle.html"];
-  const selectedPage = pages[Math.floor(Math.random() * pages.length)];
+    const returnUrl = encodeURIComponent(window.location.href);
+    fetch("get-captcha.php")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.type || !data.token) {
+          console.error("Invalid CAPTCHA response from server.");
+          return;
+        }
 
-  history.replaceState({}, "", window.location.href);
-  window.location.replace(`${selectedPage}?returnUrl=${returnUrl}`);
-}
+        const page = data.type === "puzzle"
+          ? "captcha-puzzle.html"
+          : "captcha-text.html";
+
+        sessionStorage.setItem("captchaType", data.type);
+        window.location.replace(`${page}?returnUrl=${returnUrl}&token=${data.token}`);
+      })
+      .catch(err => {
+        console.error("CAPTCHA fetch failed:", err);
+      });
+  }
 
   // === Event Listeners ===
-
   document.addEventListener("mousemove", (e) => {
     const now = Date.now();
     mousePositions.push({ x: e.clientX, y: e.clientY, time: now });
@@ -131,8 +138,9 @@
     if (scrollRecords.length > 50) scrollRecords.shift();
   });
 
+  // === Continuous Bot Check ===
   setInterval(() => {
-    if (checkSuspicious()) {
+    if (!isCaptchaPage && checkSuspicious()) {
       triggerCaptcha();
       mousePositions = [];
       keyPressTimes = [];

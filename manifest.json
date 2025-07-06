@@ -5,6 +5,14 @@
   "description": "Tracks human behavior and triggers CAPTCHA on suspicious activity.",
   "permissions": ["scripting", "tabs", "activeTab"],
   "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "Activity Tracker"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
