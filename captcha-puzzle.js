@@ -100,14 +100,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
 
-      alert("✅ Verified! Redirecting...");
+      alert("Verified! Redirecting...");
       if (returnUrl) {
         window.location.href = decodeURIComponent(returnUrl);
       } else {
         window.history.back();
       }
     } else {
-      alert("❌ " + result.message);
+      alert(result.message);
     }
   });
 
