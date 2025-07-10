@@ -1,7 +1,7 @@
 <?php
 include 'db.php';
 
-$result = $conn->query("SELECT id, captcha_id, user_answer, time_taken_ms, mouse_path, created_at FROM user_logs ORDER BY created_at DESC LIMIT 20");
+$result = $conn->query("SELECT id, captcha_id, user_answer, time_taken_ms, mouse_path, created_at FROM text_logs ORDER BY created_at DESC LIMIT 20");
 ?>
 
 <!DOCTYPE html>

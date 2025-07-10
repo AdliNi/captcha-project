@@ -50,7 +50,7 @@ if (count($mouseData) >= 3 && !$isBot) {
 $mousePathJson = json_encode($mouseData);
 
 // Save to DB (always log for analysis)
-$logStmt = $conn->prepare("INSERT INTO user_logs (captcha_id, user_answer, time_taken_ms, mouse_path) VALUES (?, ?, ?, ?)");
+$logStmt = $conn->prepare("INSERT INTO text_logs (captcha_id, user_answer, time_taken_ms, mouse_path) VALUES (?, ?, ?, ?)");
 $logStmt->bind_param("isis", $captcha_id, $user_answer, $timeTaken, $mousePathJson);
 $logStmt->execute();
 $logStmt->close();
