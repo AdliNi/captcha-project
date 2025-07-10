@@ -78,7 +78,7 @@ if ($result && $result->num_rows > 0) {
     $id = $row['id'];
     $token = htmlspecialchars($row['token']);
     $time = $row['time_taken_ms'];
-    $resultText = $row['result'] === 'pass' ? '✅ Pass' : '❌ Fail';
+    $resultText = $row['result'] === 'pass' ? 'Pass' : 'Fail';
     $created = $row['created_at'];
 
     $submitted = htmlspecialchars($row['submitted_order']);

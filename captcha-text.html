@@ -22,19 +22,9 @@
     z-index: 9999;
     position: relative;
   ">
-    <!-- Close button -->
-    <button id="closeTextCaptchaModal" style="
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    ">&times;</button>
-
+  
     <h3 style="margin-top: 0;">CAPTCHA Challenge</h3>
-    <label id="captchaQuestion">Loading question...</label><br><br>
+    <label id="captchaQuestion" style="user-select: none;">Loading question...</label><br><br>
     <input type="text" id="captchaAnswer" style="width: 100%; padding: 8px; margin-bottom: 10px;" /><br>
     <button id="submitBtn" style="
       padding: 8px 16px;
@@ -51,3 +41,4 @@
 </div>
 
 <script src="captcha-text.js"></script>
+

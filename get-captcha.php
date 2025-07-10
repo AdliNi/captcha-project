@@ -1,8 +1,9 @@
 <?php
+// get-captcha.php
 session_start();
 include 'db.php';
 
-header("Content-Type: application/json"); // ✅ REQUIRED for JSON responses
+header("Content-Type: application/json"); // REQUIRED for JSON responses
 
 // Randomly choose CAPTCHA type each time
 $type = rand(0, 1) ? "text" : "puzzle";

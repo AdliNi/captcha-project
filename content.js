@@ -9,7 +9,7 @@
   const MAX_LINEARITY = 0.95;
   const MIN_TYPING_INTERVAL = 50;
   const MAX_TYPING_INTERVAL = 1000;
-  const MAX_SCROLL_SPEED = 2.0;
+  const MAX_SCROLL_SPEED = 10.0;
 
   // === Skip CAPTCHA if already on CAPTCHA page ===
   if (!isCaptchaPage &&
@@ -87,26 +87,35 @@
     sessionStorage.setItem("captchaInProgress", "true");
     sessionStorage.setItem("captchaRequired", "true");
 
-    const returnUrl = encodeURIComponent(window.location.href);
-    fetch("get-captcha.php")
+    fetch("http://localhost/captcha-extension/get-captcha.php")
       .then(res => res.json())
       .then(data => {
-        if (!data.type || !data.token) {
-          console.error("Invalid CAPTCHA response from server.");
-          return;
-        }
+        if (!data.type || !data.token) return;
 
-        const page = data.type === "puzzle"
-          ? "captcha-puzzle.html"
-          : "captcha-text.html";
+        window.captchaToken = data.token;
 
-        sessionStorage.setItem("captchaType", data.type);
-        window.location.replace(`${page}?returnUrl=${returnUrl}&token=${data.token}`);
-      })
-      .catch(err => {
-        console.error("CAPTCHA fetch failed:", err);
+        const modalUrl = chrome.runtime.getURL(
+          data.type === "puzzle" ? "captcha-puzzle.html" : "captcha-text.html"
+        );
+
+        fetch(modalUrl)
+          .then(res => res.text())
+          .then(html => {
+            // Inject modal into DOM
+            const modal = document.createElement("div");
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+
+            // Only inject JS after HTML is in the DOM
+            const script = document.createElement("script");
+            script.src = chrome.runtime.getURL(
+              data.type === "puzzle" ? "captcha-puzzle.js" : "captcha-text.js"
+            );
+            document.body.appendChild(script);
+          },200);
       });
   }
+
 
   // === Event Listeners ===
   document.addEventListener("mousemove", (e) => {

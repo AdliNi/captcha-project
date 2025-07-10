@@ -7,18 +7,18 @@ import os
 
 # === CONFIG ===
 url = "http://localhost/captcha-extension/DummyPage.html"
-extension_path = os.path.abspath(r"C:/xampp/htdocs/captcha-extension")  # ✅ Make sure it's absolute
+extension_path = os.path.abspath(r"C:/xampp/htdocs/captcha-extension")  # Make sure it's absolute
 
 # === Setup Chrome with Unpacked Extension ===
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_argument(f"--load-extension={extension_path}")
 options.add_argument("--start-maximized")
-# options.add_argument("--headless")  # ❌ Do NOT use headless if testing extension
+# options.add_argument("--headless")  # Do NOT use headless if testing extension
 
 # === Start Chrome Driver ===
 print("🚀 Launching Chrome with extension...")
-service = Service("chromedriver.exe")  # ✅ Ensure chromedriver matches your Chrome version
+service = Service("chromedriver.exe")  # Ensure chromedriver matches your Chrome version
 driver = webdriver.Chrome(service=service, options=options)
 
 # === Allow time for extension to load ===
@@ -53,10 +53,10 @@ try:
         time.sleep(0.05)  # Very fast scroll
 
 except Exception as e:
-    print("❌ Bot simulation error:", e)
+    print("Bot simulation error:", e)
 
 # === Monitor the result ===
-print("✅ Bot test completed. Waiting to observe CAPTCHA trigger...")
+print("Bot test completed. Waiting to observe CAPTCHA trigger...")
 print("🌐 Current page:", driver.current_url)
 time.sleep(60)
 

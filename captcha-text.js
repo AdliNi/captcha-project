@@ -1,48 +1,55 @@
-document.addEventListener("DOMContentLoaded", () => {
+function waitForModalAndRun() {
+  const questionEl = document.getElementById("captchaQuestion");
+  const answerInput = document.getElementById("captchaAnswer");
+  const submitBtn = document.getElementById("submitBtn");
+  const messageEl = document.getElementById("message");
+
+  // Keep waiting if elements aren't injected yet
+  if (!questionEl || !answerInput || !submitBtn || !messageEl) {
+    return setTimeout(waitForModalAndRun, 100);
+  }
+
+  // === CAPTCHA Logic Starts Here ===
   let currentCaptchaId = null;
   let captchaToken = null;
   let captchaStartTime = null;
   let mouseMovements = [];
+  let failCount = 0;
+  const maxFails = 3;
 
-  const returnUrl = new URLSearchParams(window.location.search).get("returnUrl") || "/";
-  const tokenFromURL = new URLSearchParams(window.location.search).get("token");
-
-  // Track mouse movement
+  // Mouse movement tracking
   document.addEventListener("mousemove", (e) => {
-    mouseMovements.push({
-      x: e.clientX,
-      y: e.clientY,
-      t: Date.now()
-    });
+    mouseMovements.push({ x: e.clientX, y: e.clientY, t: Date.now() });
   });
 
-  // === Fetch question from new endpoint ===
-  fetch("get-text.php")
+  // Load CAPTCHA question
+  fetch("http://localhost/captcha-extension/get-text.php")
     .then(res => res.json())
     .then(data => {
       if (data.error || !data.question || !data.id || !data.token) {
-        document.getElementById("message").textContent = "⚠️ Failed to load CAPTCHA. Try refreshing.";
+        questionEl.textContent = "Failed to load CAPTCHA.";
         console.error("CAPTCHA error:", data.message || data);
         return;
       }
 
-      // Assign question content
-      document.getElementById("captchaQuestion").innerText = data.question;
+      questionEl.textContent = data.question;
       currentCaptchaId = data.id;
       captchaToken = data.token;
       captchaStartTime = Date.now();
     })
     .catch(err => {
       console.error("Fetch error:", err);
-      document.getElementById("message").textContent = "⚠️ Error loading CAPTCHA. Check your connection.";
+      questionEl.textContent = "Error loading CAPTCHA.";
     });
 
+  // Submit validation
   function checkCaptcha() {
-    const answer = document.getElementById('captchaAnswer').value.trim();
-    const messageEl = document.getElementById('message');
+    if (failCount >= maxFails) return;
+
+    const answer = answerInput.value.trim();
     const timeTaken = Date.now() - captchaStartTime;
 
-    fetch("validate-text.php", {
+    fetch("http://localhost/captcha-extension/validate-text.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -53,40 +60,61 @@ document.addEventListener("DOMContentLoaded", () => {
         token: captchaToken
       })
     })
-    .then(res => res.json())
-    .then(result => {
-      if (result.success) {
-        messageEl.style.color = 'green';
-        messageEl.textContent = '✅ CAPTCHA passed! Redirecting...';
-        sessionStorage.removeItem("captchaInProgress");
-        sessionStorage.removeItem("captchaRequired");
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          messageEl.style.color = "green";
+          messageEl.textContent = "CAPTCHA passed!";
+          sessionStorage.removeItem("captchaInProgress");
+          sessionStorage.removeItem("captchaRequired");
 
-        // Redirect user
-        setTimeout(() => {
-          window.location.href = decodeURIComponent(returnUrl);
-        }, 1000);
-      } else {
-        messageEl.style.color = 'red';
-        messageEl.textContent = '❌ ' + result.message;
-      }
-    })
-    .catch((err) => {
-      console.error("Validation error:", err);
-      messageEl.style.color = 'red';
-      messageEl.textContent = '⚠️ Error validating CAPTCHA. Try again.';
-    });
+          setTimeout(() => {
+            document.getElementById("captchaTextModalOverlay")?.remove();
+            document.body.style.overflow = "auto";
+          }, 1000);
+        } else {
+          failCount++;
+          messageEl.style.color = "red";
+          messageEl.textContent = `${result.message || "Incorrect answer."} (${failCount}/${maxFails})`;
+
+          if (failCount >= maxFails) {
+            lockUserOut();
+          }
+        }
+      })
+      .catch(err => {
+        console.error("Validation error:", err);
+        messageEl.style.color = "red";
+        messageEl.textContent = "Validation error. Try again.";
+      });
   }
 
-  // === Bind UI Events ===
-  document.getElementById('submitBtn').addEventListener('click', (e) => {
+  // Lockout function
+  function lockUserOut() {
+    messageEl.style.color = "darkred";
+    messageEl.textContent = "Too many failed attempts. Try again later.";
+    answerInput.disabled = true;
+    submitBtn.disabled = true;
+
+    setTimeout(() => {
+      document.getElementById("captchaTextModalOverlay")?.remove();
+      document.body.style.overflow = "auto";
+      sessionStorage.removeItem("captchaInProgress");
+    }, 3000);
+  }
+
+  // Button + Enter key bindings
+  submitBtn.addEventListener("click", (e) => {
     e.preventDefault();
     checkCaptcha();
   });
 
-  document.getElementById('captchaAnswer').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
+  answerInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
       event.preventDefault();
       checkCaptcha();
     }
   });
-});
+}
+
+waitForModalAndRun();
