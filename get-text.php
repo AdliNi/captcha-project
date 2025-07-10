@@ -20,8 +20,8 @@ function generateTextCaptcha() {
     $type = rand(0, 1) ? "math" : "typing";
 
     if ($type === "math") {
-        $num1 = rand(1, 20);
-        $num2 = rand(1, 20);
+        $num1 = rand(1, 50);
+        $num2 = rand(1, 50);
         $op = $operations[array_rand($operations)];
 
         switch ($op) {

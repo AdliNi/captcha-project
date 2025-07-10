@@ -134,10 +134,6 @@
     }
     lastKeyTime = now;
 
-    const elapsedMin = (now - typingStartTime) / 60000;
-    const cpm = Math.round(totalTypedChars / elapsedMin);
-    const display = document.getElementById("typingSpeedDisplay");
-    if (display) display.textContent = `Typing Speed: ${cpm} CPM`;
   });
 
   document.addEventListener("scroll", () => {
