@@ -57,15 +57,35 @@ $result = $conn->query("SELECT id, captcha_id, user_answer, time_taken_ms, mouse
 
       const points = JSON.parse(mouseData);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       if (points.length === 0) return;
 
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
+      // Get min and max values for normalization
+      const xVals = points.map(p => p.x);
+      const yVals = points.map(p => p.y);
+      const minX = Math.min(...xVals);
+      const maxX = Math.max(...xVals);
+      const minY = Math.min(...yVals);
+      const maxY = Math.max(...yVals);
 
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
+      const padding = 20; // padding around canvas edges
+      const canvasWidth = canvas.width - padding * 2;
+      const canvasHeight = canvas.height - padding * 2;
+
+      const scaleX = canvasWidth / (maxX - minX || 1);
+      const scaleY = canvasHeight / (maxY - minY || 1);
+      const scale = Math.min(scaleX, scaleY); // maintain aspect ratio
+
+      // Draw scaled and centered path
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        const x = padding + (p.x - minX) * scale;
+        const y = padding + (p.y - minY) * scale;
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
 
       ctx.strokeStyle = "blue";
       ctx.lineWidth = 2;
