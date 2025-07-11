@@ -1,9 +1,9 @@
 <?php
-//For InfinityFree hosting, use the following credentials
-$servername = "sql201.infinityfree.com";      // MySQL Hostname
-$username = "if0_39442078";                   // MySQL Username
-$password = "vJLtyHnMYm";                     // MySQL Password
-$database = "if0_39442078_db_captcha";        // Database Name
+// db.php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$database = "captcha-project";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $database);

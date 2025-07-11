@@ -26,7 +26,7 @@ function waitForPuzzleModal() {
 
   async function getPuzzleDataFromDB() {
     try {
-      const response = await fetch("https://captcha-ex.rf.gd/get-puzzle.php");
+      const response = await fetch("http://localhost/captcha-extension/get-puzzle.php");
       const data = await response.json();
 
       if (data.type !== "puzzle") return;
@@ -97,7 +97,7 @@ function waitForPuzzleModal() {
     const timeTaken = Date.now() - startTime;
 
     try {
-      const response = await fetch("https://captcha-ex.rf.gd/validate-puzzle.php", {
+      const response = await fetch("http://localhost/captcha-extension/validate-puzzle.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -142,7 +142,7 @@ function waitForPuzzleModal() {
       document.getElementById("captchaModalOverlay")?.remove();
       document.body.style.overflow = "auto";
       sessionStorage.removeItem("captchaInProgress");
-    }, 3000);
+    }, 60000);
   }
 
   verifyBtn.addEventListener("click", handleVerify);

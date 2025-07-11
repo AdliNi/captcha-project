@@ -7,7 +7,7 @@
 
   // === Config ===
   const MAX_LINEARITY = 0.95;
-  const MIN_TYPING_INTERVAL = 50;
+  const MIN_TYPING_INTERVAL = 80;
   const MAX_TYPING_INTERVAL = 1000;
   const MAX_SCROLL_SPEED = 10.0;
 

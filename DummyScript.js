@@ -26,8 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lastKeyTime = now;
 
-    const elapsedMin = (now - typingStartTime) / 60000;
-    const cpm = Math.round(totalTypedChars / elapsedMin);
-    display.textContent = `Typing Speed: ${cpm} Characters Per Minute`;
+    const elapsedTimeMs = now - typingStartTime;
+
+    if (totalTypedChars > 0) {
+      const avgMsPerChar = Math.round(elapsedTimeMs / totalTypedChars);
+      display.textContent = `Typing Speed: ${avgMsPerChar} ms per character`;
+    } else {
+      display.textContent = `Typing Speed: N/A`;
+    }
   });
 });
