@@ -87,7 +87,7 @@
     sessionStorage.setItem("captchaInProgress", "true");
     sessionStorage.setItem("captchaRequired", "true");
 
-    fetch("http://localhost/captcha-extension/get-captcha.php")
+    fetch("https://captcha-ex.rf.gd/get-captcha.php")
       .then(res => res.json())
       .then(data => {
         if (!data.type || !data.token) return;
