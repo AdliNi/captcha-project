@@ -100,7 +100,7 @@ function waitForModalAndRun() {
       document.getElementById("captchaTextModalOverlay")?.remove();
       document.body.style.overflow = "auto";
       sessionStorage.removeItem("captchaInProgress");
-    }, 3000);
+    }, 300000);//300,000ms. setTimeout to remove modal after 5 minutes 
   }
 
   // Button + Enter key bindings

@@ -5,13 +5,13 @@
     currentPage.includes("captcha-text.html") ||
     currentPage.includes("captcha-puzzle.html");
 
-  // === Config ===
+  //benchmark 
   const MAX_LINEARITY = 0.95;
-  const MIN_TYPING_INTERVAL = 80;
-  const MAX_TYPING_INTERVAL = 1000;
+  const MIN_TYPING_INTERVAL = 80; // 80ms is very fast
+  const MAX_TYPING_INTERVAL = 1000;// 1000ms is very slow
   const MAX_SCROLL_SPEED = 10.0;
 
-  // === Skip CAPTCHA if already on CAPTCHA page ===
+  // === Skip CAPTCHA prompted if already on CAPTCHA page ===
   if (!isCaptchaPage &&
       sessionStorage.getItem("captchaRequired") === "true" &&
       sessionStorage.getItem("captchaInProgress") !== "true") {
@@ -20,7 +20,7 @@
     return;
   }
 
-  // === Behavior Tracking ===
+  // === Behavior logging ===
   let mousePositions = [];
   let keyPressTimes = [];
   let scrollRecords = [];
@@ -28,6 +28,7 @@
   let typingStartTime = 0;
   let totalTypedChars = 0;
 
+  // calclulate linearity of mouse movement
   function calculateLinearity(points) {
     if (points.length < 3) return 0;
     const start = points[0];
@@ -44,6 +45,7 @@
     return directDist / pathLength;
   }
 
+  // calculate typing irregularities
   function analyzeTyping() {
     if (keyPressTimes.length < 5) return false;
     let irregularCount = 0;
@@ -54,8 +56,10 @@
     const irregularRatio = irregularCount / (keyPressTimes.length - 1);
     const avgInterval = keyPressTimes.reduce((a, b) => a + b, 0) / keyPressTimes.length;
     return avgInterval < MIN_TYPING_INTERVAL || irregularRatio > 0.5 || avgInterval > MAX_TYPING_INTERVAL;
+    //detected when average interval is less than 80ms or more than 50% irregular intervals or average interval is more than 1000ms
   }
 
+  // analyze scrolling behavior
   function analyzeScrolling() {
     if (scrollRecords.length < 3) return false;
     let totalScroll = 0;
@@ -68,6 +72,7 @@
     return speed > MAX_SCROLL_SPEED;
   }
 
+  // check for suspicious behavior
   function checkSuspicious() {
     const linearity = calculateLinearity(mousePositions);
     const suspiciousMouse = linearity > MAX_LINEARITY;

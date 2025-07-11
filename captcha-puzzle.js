@@ -142,7 +142,7 @@ function waitForPuzzleModal() {
       document.getElementById("captchaModalOverlay")?.remove();
       document.body.style.overflow = "auto";
       sessionStorage.removeItem("captchaInProgress");
-    }, 60000);
+    }, 300000); //setTimeout to remove modal after 5 minutes
   }
 
   verifyBtn.addEventListener("click", handleVerify);
