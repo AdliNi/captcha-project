@@ -1,3 +1,5 @@
+// File: captcha-puzzle.js
+
 function waitForPuzzleModal() {
   const container = document.getElementById("puzzle-container");
   const verifyBtn = document.getElementById("verify-btn");
@@ -24,6 +26,7 @@ function waitForPuzzleModal() {
     if (mouseMovements.length > 300) mouseMovements.shift();
   });
 
+  // Fetch puzzle data from the server
   async function getPuzzleDataFromDB() {
     try {
       const response = await fetch("http://localhost/captcha-extension/get-puzzle.php");
@@ -40,10 +43,12 @@ function waitForPuzzleModal() {
     }
   }
 
+  // Shuffle function to randomize puzzle pieces
   function shuffle(array) {
     return array.sort(() => Math.random() - 0.5);
   }
 
+  // Load puzzle pieces and set up drag-and-drop functionality
   async function loadPuzzle() {
     const pieces = await getPuzzleDataFromDB();
     if (!pieces) return;
@@ -91,6 +96,7 @@ function waitForPuzzleModal() {
     });
   }
 
+  // Handle verification of the puzzle
   async function handleVerify() {
     const imgs = [...container.children];
     const order = imgs.map(img => img.src.split('/').pop());
@@ -132,6 +138,7 @@ function waitForPuzzleModal() {
     }
   }
 
+  // Lock user out after too many failed attempts (3)
   function lockUserOut() {
     messageBox.style.color = "darkred";
     messageBox.textContent = "Too many failed attempts. You are locked out.";
@@ -146,16 +153,8 @@ function waitForPuzzleModal() {
   }
 
   verifyBtn.addEventListener("click", handleVerify);
-
-  const closeBtn = document.getElementById("closeCaptchaModal");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      document.getElementById("captchaModalOverlay")?.remove();
-      document.body.style.overflow = "auto";
-      sessionStorage.removeItem("captchaInProgress");
-    });
-  }
-
+  
+  // Load the puzzle pieces when the modal is ready
   loadPuzzle();
 }
 

@@ -1,9 +1,8 @@
 <!-- captcha-text-modal.html -->
 
-<!-- Load Fira Code from Google Fonts -->
+<!-- Load Fira Code from Google Fonts for better character difference(Il0O)-->
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
 
-<!-- Optional: Your own CSS -->
 <link rel="stylesheet" href="captcha-text.css" />
 
 <div id="captchaTextModalOverlay" style="
@@ -28,7 +27,8 @@
     position: relative;
   ">
     <h3 style="margin-top: 0;">CAPTCHA Challenge</h3>
-    <label id="captchaQuestion" style="user-select: none;">Loading question...</label><br><br>
+    <!--style="user-select: none ensure user cant copy and pastefrom the question--> 
+    <label id="captchaQuestion" style="user-select: none;">Loading question...</label><br><br> 
     <input type="text" id="captchaAnswer" style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: 'Fira Code', monospace;" />
     <button id="submitBtn" style="
       padding: 8px 16px;

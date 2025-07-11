@@ -1,3 +1,4 @@
+// File: captcha-text.js
 function waitForModalAndRun() {
   const questionEl = document.getElementById("captchaQuestion");
   const answerInput = document.getElementById("captchaAnswer");
@@ -22,7 +23,7 @@ function waitForModalAndRun() {
     mouseMovements.push({ x: e.clientX, y: e.clientY, t: Date.now() });
   });
 
-  // Load CAPTCHA question
+  // get CAPTCHA question
   fetch("http://localhost/captcha-extension/get-text.php")
     .then(res => res.json())
     .then(data => {
