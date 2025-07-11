@@ -1,17 +1,4 @@
 <?php
-// CORS headers
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("Access-Control-Allow-Origin: *"); // Or replace * with specific domain
-    header("Access-Control-Allow-Headers: Content-Type");
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-    exit(0);
-}
-
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Content-Type: application/json");
-
 session_start();
 include 'db.php';
 
@@ -33,8 +20,8 @@ function generateTextCaptcha() {
     $type = rand(0, 1) ? "math" : "typing";
 
     if ($type === "math") {
-        $num1 = rand(1, 50);
-        $num2 = rand(1, 50);
+        $num1 = rand(1, 20);
+        $num2 = rand(1, 20);
         $op = $operations[array_rand($operations)];
 
         switch ($op) {
@@ -57,15 +44,6 @@ list($question, $answer) = generateTextCaptcha();
 
 // Insert into database
 $stmt = $conn->prepare("INSERT INTO text_questions (question, answer) VALUES (?, ?)");
-if (!$stmt) {
-    http_response_code(500);
-    echo json_encode([
-        "error" => true,
-        "message" => "Database prepare failed: " . $conn->error
-    ]);
-    exit;
-}
-
 $stmt->bind_param("ss", $question, $answer);
 
 if ($stmt->execute()) {
@@ -77,6 +55,7 @@ if ($stmt->execute()) {
     $_SESSION['captcha_answer'] = ['id' => $id];
     $_SESSION['captcha_issued_at'] = time();
 
+    // Output in desired format
     echo json_encode([
         "type" => "text",
         "id" => $id,
@@ -84,12 +63,12 @@ if ($stmt->execute()) {
         "token" => $token
     ]);
 } else {
-    http_response_code(500);
     echo json_encode([
         "error" => true,
-        "message" => "Failed to insert CAPTCHA question: " . $stmt->error
+        "message" => "Failed to insert CAPTCHA question"
     ]);
 }
 
 $stmt->close();
 $conn->close();
+?>

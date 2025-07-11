@@ -87,7 +87,7 @@
     sessionStorage.setItem("captchaInProgress", "true");
     sessionStorage.setItem("captchaRequired", "true");
 
-    fetch("https://captcha-ex.rf.gd/get-captcha.php")
+    fetch("http://localhost/captcha-extension/get-captcha.php")
       .then(res => res.json())
       .then(data => {
         if (!data.type || !data.token) return;
@@ -134,6 +134,10 @@
     }
     lastKeyTime = now;
 
+    const elapsedMin = (now - typingStartTime) / 60000;
+    const cpm = Math.round(totalTypedChars / elapsedMin);
+    const display = document.getElementById("typingSpeedDisplay");
+    if (display) display.textContent = `Typing Speed: ${cpm} CPM`;
   });
 
   document.addEventListener("scroll", () => {

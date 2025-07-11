@@ -23,7 +23,7 @@ function waitForModalAndRun() {
   });
 
   // Load CAPTCHA question
-  fetch("https://captcha-ex.rf.gd/get-text.php")
+  fetch("http://localhost/captcha-extension/get-text.php")
     .then(res => res.json())
     .then(data => {
       if (data.error || !data.question || !data.id || !data.token) {
@@ -49,7 +49,7 @@ function waitForModalAndRun() {
     const answer = answerInput.value.trim();
     const timeTaken = Date.now() - captchaStartTime;
 
-    fetch("https://captcha-ex.rf.gd/validate-text.php", {
+    fetch("http://localhost/captcha-extension/validate-text.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
