@@ -6,7 +6,7 @@ import time
 import os
 
 # === CONFIG ===
-url = "https://captcha-ex.rf.gd/DummyPage.html"
+url = "https://captcha-ex.rf.gd"
 extension_path = os.path.abspath(r"C:/xampp/htdocs/captcha-extension")  # Make sure it's absolute
 
 # === Setup Chrome with Unpacked Extension ===

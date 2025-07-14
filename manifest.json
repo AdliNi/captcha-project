@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Activity Tracker CAPTCHA",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Tracks human behavior and triggers CAPTCHA on suspicious activity.",
   "host_permissions": ["<all_urls>"],
   "action": {
