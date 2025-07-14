@@ -24,9 +24,9 @@ function waitForModalAndRun() {
   });
 
   // get CAPTCHA question
-  fetch("http://localhost/captcha-extension/get-text.php")
-    .then(res => res.json())
-    .then(data => {
+  fetch("https://captcha-ex.rf.gd/get-text.php")
+    .then((res) => res.json())
+    .then((data) => {
       if (data.error || !data.question || !data.id || !data.token) {
         questionEl.textContent = "Failed to load CAPTCHA.";
         console.error("CAPTCHA error:", data.message || data);
@@ -38,7 +38,7 @@ function waitForModalAndRun() {
       captchaToken = data.token;
       captchaStartTime = Date.now();
     })
-    .catch(err => {
+    .catch((err) => {
       console.error("Fetch error:", err);
       questionEl.textContent = "Error loading CAPTCHA.";
     });
@@ -50,7 +50,7 @@ function waitForModalAndRun() {
     const answer = answerInput.value.trim();
     const timeTaken = Date.now() - captchaStartTime;
 
-    fetch("http://localhost/captcha-extension/validate-text.php", {
+    fetch("https://captcha-ex.rf.gd/validate-text.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -58,11 +58,11 @@ function waitForModalAndRun() {
         user_answer: answer,
         time_taken: timeTaken,
         mouse_data: mouseMovements,
-        token: captchaToken
-      })
+        token: captchaToken,
+      }),
     })
-      .then(res => res.json())
-      .then(result => {
+      .then((res) => res.json())
+      .then((result) => {
         if (result.success) {
           messageEl.style.color = "green";
           messageEl.textContent = "CAPTCHA passed!";
@@ -76,14 +76,16 @@ function waitForModalAndRun() {
         } else {
           failCount++;
           messageEl.style.color = "red";
-          messageEl.textContent = `${result.message || "Incorrect answer."} (${failCount}/${maxFails})`;
+          messageEl.textContent = `${
+            result.message || "Incorrect answer."
+          } (${failCount}/${maxFails})`;
 
           if (failCount >= maxFails) {
             lockUserOut();
           }
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Validation error:", err);
         messageEl.style.color = "red";
         messageEl.textContent = "Validation error. Try again.";
@@ -101,7 +103,7 @@ function waitForModalAndRun() {
       document.getElementById("captchaTextModalOverlay")?.remove();
       document.body.style.overflow = "auto";
       sessionStorage.removeItem("captchaInProgress");
-    }, 300000);//300,000ms. setTimeout to remove modal after 5 minutes 
+    }, 300000); //300,000ms. setTimeout to remove modal after 5 minutes
   }
 
   // Button + Enter key bindings

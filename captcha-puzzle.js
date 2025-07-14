@@ -29,7 +29,7 @@ function waitForPuzzleModal() {
   // Fetch puzzle data from the server
   async function getPuzzleDataFromDB() {
     try {
-      const response = await fetch("http://localhost/captcha-extension/get-puzzle.php");
+      const response = await fetch("https://captcha-ex.rf.gd/get-puzzle.php");
       const data = await response.json();
 
       if (data.type !== "puzzle") return;
@@ -99,20 +99,23 @@ function waitForPuzzleModal() {
   // Handle verification of the puzzle
   async function handleVerify() {
     const imgs = [...container.children];
-    const order = imgs.map(img => img.src.split('/').pop());
+    const order = imgs.map((img) => img.src.split("/").pop());
     const timeTaken = Date.now() - startTime;
 
     try {
-      const response = await fetch("http://localhost/captcha-extension/validate-puzzle.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: captchaToken,
-          order: order.map(piece => `puzzle/${piece}`),
-          time_taken: timeTaken,
-          mouse_path: mouseMovements
-        })
-      });
+      const response = await fetch(
+        "https://captcha-ex.rf.gd/validate-puzzle.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token: captchaToken,
+            order: order.map((piece) => `puzzle/${piece}`),
+            time_taken: timeTaken,
+            mouse_path: mouseMovements,
+          }),
+        }
+      );
 
       const result = await response.json();
       if (result.success) {
@@ -125,7 +128,9 @@ function waitForPuzzleModal() {
       } else {
         failCount++;
         messageBox.style.color = "red";
-        messageBox.textContent = `${result.message || "Incorrect puzzle."} (${failCount}/${maxFails})`;
+        messageBox.textContent = `${
+          result.message || "Incorrect puzzle."
+        } (${failCount}/${maxFails})`;
 
         if (failCount >= maxFails) {
           lockUserOut();
@@ -153,7 +158,7 @@ function waitForPuzzleModal() {
   }
 
   verifyBtn.addEventListener("click", handleVerify);
-  
+
   // Load the puzzle pieces when the modal is ready
   loadPuzzle();
 }

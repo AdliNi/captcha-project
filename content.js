@@ -1,22 +1,23 @@
 (() => {
   const currentPage = window.location.pathname;
-  
+
   // Check if the current page is a CAPTCHA page
   const isCaptchaPage =
     currentPage.includes("captcha-text.html") ||
     currentPage.includes("captcha-puzzle.html");
 
-  //benchmark 
+  //benchmark
   const MAX_LINEARITY = 0.95;
   const MIN_TYPING_INTERVAL = 80; // 0.08s is very fast
-  const MAX_TYPING_INTERVAL = 1000;// 1s is very slow
+  const MAX_TYPING_INTERVAL = 1000; // 1s is very slow
   const MAX_SCROLL_SPEED = 10.0;
 
   // === Skip CAPTCHA prompted if already on CAPTCHA page ===
-  if (!isCaptchaPage &&
-      sessionStorage.getItem("captchaRequired") === "true" &&
-      sessionStorage.getItem("captchaInProgress") !== "true") {
-
+  if (
+    !isCaptchaPage &&
+    sessionStorage.getItem("captchaRequired") === "true" &&
+    sessionStorage.getItem("captchaInProgress") !== "true"
+  ) {
     triggerCaptcha(); // fetch-based redirect
     return;
   }
@@ -55,8 +56,13 @@
       if (diff > 500) irregularCount++;
     }
     const irregularRatio = irregularCount / (keyPressTimes.length - 1);
-    const avgInterval = keyPressTimes.reduce((a, b) => a + b, 0) / keyPressTimes.length;
-    return avgInterval < MIN_TYPING_INTERVAL || irregularRatio > 0.5 || avgInterval > MAX_TYPING_INTERVAL;
+    const avgInterval =
+      keyPressTimes.reduce((a, b) => a + b, 0) / keyPressTimes.length;
+    return (
+      avgInterval < MIN_TYPING_INTERVAL ||
+      irregularRatio > 0.5 ||
+      avgInterval > MAX_TYPING_INTERVAL
+    );
     //detected when average interval is less than 80ms or more than 50% irregular intervals or average interval is more than 1000ms
   }
 
@@ -80,13 +86,18 @@
     const suspiciousTyping = analyzeTyping();
     const suspiciousScroll = analyzeScrolling();
 
-    console.log("[Detection] Linearity:", linearity.toFixed(3),
-      "| Typing:", suspiciousTyping,
-      "| Scroll:", suspiciousScroll);
+    console.log(
+      "[Detection] Linearity:",
+      linearity.toFixed(3),
+      "| Typing:",
+      suspiciousTyping,
+      "| Scroll:",
+      suspiciousScroll
+    );
 
     return suspiciousMouse || suspiciousTyping || suspiciousScroll;
   }
-  
+
   // Trigger CAPTCHA if suspicious behavior is detected
   function triggerCaptcha() {
     if (sessionStorage.getItem("captchaInProgress") === "true") return;
@@ -94,9 +105,9 @@
     sessionStorage.setItem("captchaInProgress", "true");
     sessionStorage.setItem("captchaRequired", "true");
 
-    fetch("http://localhost/captcha-extension/get-captcha.php")
-      .then(res => res.json())
-      .then(data => {
+    fetch("https://captcha-ex.rf.gd/get-captcha.php")
+      .then((res) => res.json())
+      .then((data) => {
         if (!data.type || !data.token) return;
 
         window.captchaToken = data.token;
@@ -106,8 +117,8 @@
         );
 
         fetch(modalUrl)
-          .then(res => res.text())
-          .then(html => {
+          .then((res) => res.text())
+          .then((html) => {
             // Inject modal into DOM
             const modal = document.createElement("div");
             modal.innerHTML = html;
@@ -119,7 +130,7 @@
               data.type === "puzzle" ? "captcha-puzzle.js" : "captcha-text.js"
             );
             document.body.appendChild(script);
-          },200);
+          }, 200);
       });
   }
 
@@ -134,7 +145,7 @@
     const now = Date.now();
     if (typingStartTime === 0) typingStartTime = now;
     totalTypedChars++;
-    
+
     if (lastKeyTime !== 0) {
       keyPressTimes.push(now - lastKeyTime);
       if (keyPressTimes.length > 50) keyPressTimes.shift();
@@ -159,5 +170,5 @@
       typingStartTime = 0;
       totalTypedChars = 0;
     }
-  }, 5000);// Check every 5 seconds
+  }, 5000); // Check every 5 seconds
 })();

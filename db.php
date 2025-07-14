@@ -1,12 +1,12 @@
 <?php
 // db.php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$database = "captcha-project";
+$servername = "sql201.infinityfree.com";
+$username = "if0_39442078";
+$password = "vJLtyHnMYm";
+$dbname = "if0_39442078_db_captcha";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $database);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
