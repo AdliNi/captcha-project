@@ -1,14 +1,15 @@
 (() => {
   const currentPage = window.location.pathname;
-
+  
+  // Check if the current page is a CAPTCHA page
   const isCaptchaPage =
     currentPage.includes("captcha-text.html") ||
     currentPage.includes("captcha-puzzle.html");
 
   //benchmark 
   const MAX_LINEARITY = 0.95;
-  const MIN_TYPING_INTERVAL = 80; // 80ms is very fast
-  const MAX_TYPING_INTERVAL = 1000;// 1000ms is very slow
+  const MIN_TYPING_INTERVAL = 80; // 0.08s is very fast
+  const MAX_TYPING_INTERVAL = 1000;// 1s is very slow
   const MAX_SCROLL_SPEED = 10.0;
 
   // === Skip CAPTCHA prompted if already on CAPTCHA page ===
@@ -85,7 +86,8 @@
 
     return suspiciousMouse || suspiciousTyping || suspiciousScroll;
   }
-
+  
+  // Trigger CAPTCHA if suspicious behavior is detected
   function triggerCaptcha() {
     if (sessionStorage.getItem("captchaInProgress") === "true") return;
 
@@ -121,7 +123,6 @@
       });
   }
 
-
   // === Event Listeners ===
   document.addEventListener("mousemove", (e) => {
     const now = Date.now();
@@ -133,16 +134,12 @@
     const now = Date.now();
     if (typingStartTime === 0) typingStartTime = now;
     totalTypedChars++;
+    
     if (lastKeyTime !== 0) {
       keyPressTimes.push(now - lastKeyTime);
       if (keyPressTimes.length > 50) keyPressTimes.shift();
     }
     lastKeyTime = now;
-
-    const elapsedMin = (now - typingStartTime) / 60000;
-    const cpm = Math.round(totalTypedChars / elapsedMin);
-    const display = document.getElementById("typingSpeedDisplay");
-    if (display) display.textContent = `Typing Speed: ${cpm} CPM`;
   });
 
   document.addEventListener("scroll", () => {
@@ -162,5 +159,5 @@
       typingStartTime = 0;
       totalTypedChars = 0;
     }
-  }, 5000);
+  }, 5000);// Check every 5 seconds
 })();
