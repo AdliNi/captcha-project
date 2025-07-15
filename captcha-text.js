@@ -69,6 +69,16 @@ function waitForModalAndRun() {
           sessionStorage.removeItem("captchaInProgress");
           sessionStorage.removeItem("captchaRequired");
 
+          console.log("[SessionStorage] Flags reset.");
+          console.log(
+            " - captchaInProgress:",
+            sessionStorage.getItem("captchaInProgress")
+          );
+          console.log(
+            " - captchaRequired:",
+            sessionStorage.getItem("captchaRequired")
+          );
+
           setTimeout(() => {
             document.getElementById("captchaTextModalOverlay")?.remove();
             document.body.style.overflow = "auto";
@@ -96,14 +106,21 @@ function waitForModalAndRun() {
   function lockUserOut() {
     messageEl.style.color = "darkred";
     messageEl.textContent = "Too many failed attempts. Try again later.";
+
     answerInput.disabled = true;
     submitBtn.disabled = true;
+
+    // 🔴 Make submit button red
+    submitBtn.style.backgroundColor = "#d9534f"; // Bootstrap red
+    submitBtn.style.borderColor = "#d43f3a"; // Slightly darker border
+    submitBtn.style.color = "#ffffff"; // White text
+    submitBtn.style.cursor = "not-allowed"; // Visual indicator
 
     setTimeout(() => {
       document.getElementById("captchaTextModalOverlay")?.remove();
       document.body.style.overflow = "auto";
       sessionStorage.removeItem("captchaInProgress");
-    }, 300000); //300,000ms. setTimeout to remove modal after 5 minutes
+    }, 300000); // 5 minutes locked out
   }
 
   // Button + Enter key bindings

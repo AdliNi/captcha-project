@@ -10,6 +10,16 @@
   window.addEventListener("load", () => {
     sessionStorage.removeItem("captchaRequired");
     sessionStorage.removeItem("captchaInProgress");
+
+    console.log("[SessionStorage] Flags reset on page load.");
+    console.log(
+      " - captchaInProgress:",
+      sessionStorage.getItem("captchaInProgress")
+    );
+    console.log(
+      " - captchaRequired:",
+      sessionStorage.getItem("captchaRequired")
+    );
   });
 
   // benchmark thresholds
@@ -99,6 +109,16 @@
 
     sessionStorage.setItem("captchaInProgress", "true");
     sessionStorage.setItem("captchaRequired", "true");
+
+    console.log("[SessionStorage] CAPTCHA triggered");
+    console.log(
+      " - captchaInProgress:",
+      sessionStorage.getItem("captchaInProgress")
+    );
+    console.log(
+      " - captchaRequired:",
+      sessionStorage.getItem("captchaRequired")
+    );
 
     fetch("https://captcha-ex.rf.gd/get-captcha.php")
       .then((res) => res.json())

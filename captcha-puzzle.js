@@ -122,6 +122,16 @@ function waitForPuzzleModal() {
         sessionStorage.removeItem("captchaInProgress");
         sessionStorage.removeItem("captchaRequired");
 
+        console.log("[SessionStorage] Flags reset.");
+        console.log(
+          " - captchaInProgress:",
+          sessionStorage.getItem("captchaInProgress")
+        );
+        console.log(
+          " - captchaRequired:",
+          sessionStorage.getItem("captchaRequired")
+        );
+
         alert("Puzzle verified!");
         document.getElementById("captchaModalOverlay")?.remove();
         document.body.style.overflow = "auto";
@@ -149,12 +159,16 @@ function waitForPuzzleModal() {
     messageBox.textContent = "Too many failed attempts. You are locked out.";
 
     verifyBtn.disabled = true;
+    verifyBtn.style.backgroundColor = "#d9534f"; // 🔴 Red background
+    verifyBtn.style.borderColor = "#d43f3a"; // Slightly darker red border
+    verifyBtn.style.color = "#ffffff"; // White text for contrast
+    verifyBtn.style.cursor = "not-allowed"; // Visual cue that it's disabled
 
     setTimeout(() => {
       document.getElementById("captchaModalOverlay")?.remove();
       document.body.style.overflow = "auto";
       sessionStorage.removeItem("captchaInProgress");
-    }, 300000); //setTimeout to remove modal after 5 minutes
+    }, 300000); // 5 minutes
   }
 
   verifyBtn.addEventListener("click", handleVerify);
