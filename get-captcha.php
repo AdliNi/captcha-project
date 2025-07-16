@@ -3,6 +3,10 @@
 session_start();
 include 'db.php';
 
+// Allow all origins (you can change '*' to a specific domain if needed)
+header("Access-Control-Allow-Origin: *");  // Allow cross-origin requests
+header("Access-Control-Allow-Methods: GET, POST");  // Allow specific HTTP methods
+header("Access-Control-Allow-Headers: Content-Type, Authorization");  // Allow specific headers
 header("Content-Type: application/json"); // REQUIRED for JSON responses
 
 // Randomly choose CAPTCHA type each time

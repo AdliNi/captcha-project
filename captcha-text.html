@@ -1,46 +1,77 @@
 <!-- captcha-text-modal.html -->
 
 <!-- Load Fira Code from Google Fonts for better character difference(Il0O)-->
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+<link
+  href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap"
+  rel="stylesheet"
+/>
 
 <link rel="stylesheet" href="captcha-text.css" />
-  
-<div id="captchaTextModalOverlay" style="
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9998;
-">
-  <div id="captchaTextModalBox" style="
-    background: white;
-    padding: 25px 30px;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
-    width: 340px;
-    text-align: center;
-    font-family: 'Fira Code', monospace;
-    z-index: 9999;
-    position: relative;
-  ">
-    <h3 style="margin-top: 0;">CAPTCHA Challenge</h3>
-    <!--style="user-select: none ensure user cant copy and pastefrom the question--> 
-    <label id="captchaQuestion" style="user-select: none;">Loading question...</label><br><br> 
-    <input type="text" id="captchaAnswer" style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: 'Fira Code', monospace;" />
-    <button id="submitBtn" style="
-      padding: 8px 16px;
-      font-size: 14px;
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    ">Submit</button>
 
-    <div class="message" id="message" style="margin-top: 12px; color: red;"></div>
+<div
+  id="captchaTextModalOverlay"
+  style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+  "
+>
+  <div
+    id="captchaTextModalBox"
+    style="
+      background: white;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      width: 340px;
+      text-align: center;
+      font-family: 'Fira Code', monospace;
+      z-index: 9999;
+      position: relative;
+    "
+  >
+    <h3 style="margin-top: 0">CAPTCHA Challenge</h3>
+    <!--style="user-select: none ensure user cant copy and pastefrom the question-->
+    <label id="captchaQuestion" style="user-select: none"
+      >Loading question...</label
+    ><br /><br />
+    <input
+      type="text"
+      id="captchaAnswer"
+      style="
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        font-family: 'Fira Code', monospace;
+      "
+    />
+    <button
+      id="submitBtn"
+      style="
+        padding: 8px 16px;
+        font-size: 14px;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      "
+    >
+      Submit
+    </button>
+
+    <div
+      class="message"
+      id="message"
+      style="margin-top: 12px; color: red"
+    ></div>
   </div>
 </div>
 

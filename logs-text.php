@@ -1,6 +1,13 @@
 <?php
 include 'db.php';
 
+// Allow all origins (you can change '*' to a specific domain if needed)
+header("Access-Control-Allow-Origin: *");  // Allow cross-origin requests
+header("Access-Control-Allow-Methods: GET, POST");  // Allow specific HTTP methods
+header("Access-Control-Allow-Headers: Content-Type, Authorization");  // Allow specific headers
+
+header("Content-Type: application/json"); // REQUIRED for JSON responses
+
 $result = $conn->query("SELECT id, captcha_id, user_answer, time_taken_ms, mouse_path, created_at FROM text_logs ORDER BY created_at DESC LIMIT 20");
 ?>
 
