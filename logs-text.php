@@ -6,7 +6,6 @@ header("Access-Control-Allow-Origin: *");  // Allow cross-origin requests
 header("Access-Control-Allow-Methods: GET, POST");  // Allow specific HTTP methods
 header("Access-Control-Allow-Headers: Content-Type, Authorization");  // Allow specific headers
 
-header("Content-Type: application/json"); // REQUIRED for JSON responses
 
 // Update SQL to join with text_questions and get the question
 $result = $conn->query("SELECT l.id, l.captcha_id, q.question, l.user_answer, l.time_taken_ms, l.mouse_path, l.created_at
