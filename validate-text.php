@@ -1,5 +1,9 @@
 <?php
 // validate-captcha.php
+
+header("Access-Control-Allow-Origin: *");  // Allow cross-origin requests
+header("Access-Control-Allow-Methods: GET, POST");  // Allow specific HTTP methods
+header("Access-Control-Allow-Headers: Content-Type, Authorization");  // Allow specific headers
 header('Content-Type: application/json');
 include 'db.php';
 
