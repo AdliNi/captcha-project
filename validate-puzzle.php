@@ -88,9 +88,9 @@ if ($isBot) {
 }
 
 // === Step 6: Log into Database ===
-$stmt = $conn->prepare("INSERT INTO puzzle_logs (token, submitted_order, correct_order, time_taken_ms, result, mouse_path)
-                        VALUES (?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("sssiss", $token, $submittedJson, $correctJson, $timeTaken, $result, $mousePathJson);
+$stmt = $conn->prepare("INSERT INTO puzzle_logs (token, submitted_order, correct_order, time_taken_ms, result, mouse_path, bot_reason)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("sssisss", $token, $submittedJson, $correctJson, $timeTaken, $result, $mousePathJson, $botReason);
 $stmt->execute();
 $stmt->close();
 $conn->close();

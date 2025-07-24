@@ -49,12 +49,30 @@ test("captcha triggers on bot-like behavior", async () => {
       timeout: 5000,
     });
   } else if (await puzzleModal.isVisible()) {
-    // Wait for puzzle pieces to load
+    // Wait for puzzle pieces and verify button to be ready
     await page.waitForSelector("#puzzle-container img", { timeout: 10000 });
-    // For a real test, you’d need to drag pieces into the correct order.
-    // For now, just click verify to test the flow.
+    await page.waitForSelector("#verify-btn:not([disabled])", {
+      timeout: 10000,
+    });
+
+    // Listen for browser console logs
+    page.on("console", (msg) => {
+      if (msg.type() === "log" || msg.type() === "error") {
+        console.log("BROWSER LOG:", msg.text());
+      }
+    });
+
+    // Try both click methods
     await page.click("#verify-btn");
-    // Optionally, check for success or error message
+    await page.waitForTimeout(1000); // Wait for any async JS
+
+    // If no log, try JS click
+    await page.evaluate(() => {
+      document.getElementById("verify-btn").click();
+    });
+    await page.waitForTimeout(2000); // Wait for any async JS
+
+    // Optionally, check for a result message or modal close
     // await expect(page.locator("#puzzleMessage")).toHaveText(/Puzzle verified!/i, { timeout: 5000 });
   } else {
     throw new Error("No known CAPTCHA modal appeared.");

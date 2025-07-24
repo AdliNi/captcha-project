@@ -59,6 +59,7 @@ $result = $conn->query("SELECT * FROM puzzle_logs ORDER BY created_at DESC LIMIT
     <th>ID</th>
     <th>Time (ms)</th>
     <th>Result</th>
+    <th>Bot Reason</th>
     <th>Timestamp</th>
     <th>Action</th>
   </tr>
@@ -75,17 +76,19 @@ if ($result && $result->num_rows > 0) {
     $correct = htmlspecialchars($row['correct_order']);
     $mousePathRaw = $row['mouse_path'];
     $mouseAttr = htmlspecialchars($mousePathRaw);
+    $botReason = isset($row['bot_reason']) ? htmlspecialchars($row['bot_reason']) : '';
 
     echo "<tr class='log-row' data-id='$id' data-mouse=\"$mouseAttr\" data-submitted='$submitted' data-correct='$correct'>
       <td>$id</td>
       <td>$time</td>
       <td>$resultText</td>
+      <td>$botReason</td>
       <td>$created</td>
       <td><span class='toggle-btn' onclick='event.stopPropagation(); toggleDetails($id)'>Toggle Details</span></td>
     </tr>";
 
     echo "<tr class='details-row'>
-      <td colspan='5'>
+      <td colspan='6'>
         <div class='details' id='details-$id'>
           <p class='log-title'><strong>Submitted Order:</strong></p>
           <div class='json-box'>$submitted</div>
@@ -95,6 +98,9 @@ if ($result && $result->num_rows > 0) {
 
           <p class='log-title'><strong>Mouse Path (JSON):</strong></p>
           <div class='json-box'>$mouseAttr</div>
+
+          <p class='log-title'><strong>Bot Reason:</strong></p>
+          <div class='json-box'>$botReason</div>
         </div>
       </td>
     </tr>";
