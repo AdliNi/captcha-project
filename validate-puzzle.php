@@ -102,7 +102,7 @@ if ($result === 'pass') {
 } elseif ($result === 'bot') {
     echo json_encode([
         "success" => false,
-        "message" => "Bot behavior detected",
+        "message" => $botReason,
         "bot_reason" => $botReason
     ]);
 } else {

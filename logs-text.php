@@ -8,7 +8,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");  // Allow s
 
 
 // Update SQL to join with text_questions and get the question
-$result = $conn->query("SELECT l.id, l.captcha_id, q.question, l.user_answer, l.time_taken_ms, l.mouse_path, l.created_at
+$result = $conn->query("SELECT l.id, l.captcha_id, q.question, l.user_answer, l.time_taken_ms, l.mouse_path, l.created_at, l.bot_reason, l.result
 FROM text_logs l
 LEFT JOIN text_questions q ON l.captcha_id = q.id
 ORDER BY l.created_at DESC LIMIT 20");
@@ -36,6 +36,8 @@ ORDER BY l.created_at DESC LIMIT 20");
         <th>ID</th>
         <th>Question</th>
         <th>Answer</th>
+        <th>Result</th>
+        <th>Bot Reason</th>
         <th>Time Taken (ms)</th>
         <th>Date</th>
       </tr>
@@ -46,6 +48,8 @@ ORDER BY l.created_at DESC LIMIT 20");
           <td><?php echo $row["captcha_id"]; ?></td>
           <td><?php echo htmlspecialchars($row["question"]); ?></td>
           <td><?php echo htmlspecialchars($row["user_answer"]); ?></td>
+          <td><?php echo isset($row["result"]) ? htmlspecialchars($row["result"]) : ""; ?></td>
+          <td><?php echo isset($row["bot_reason"]) ? htmlspecialchars($row["bot_reason"]) : ""; ?></td>
           <td><?php echo $row["time_taken_ms"]; ?></td>
           <td><?php echo $row["created_at"]; ?></td>
         </tr>
