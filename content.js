@@ -24,16 +24,11 @@
 
   // benchmark thresholds
   const MAX_SUSPICIOUS_THRESHOLD = 3; // Trigger CAPTCHA after 3 consecutive suspicious checks
-  const MIN_TYPING_INTERVAL = 80;
-  const MAX_TYPING_INTERVAL = 1000;
-  const MAX_SCROLL_SPEED = 10.0;
-  const MAX_LINEARITY = 0.95;
-  const MAX_MOUSE_SPEED = 3000; // pixels per second (increased for better detection)
-  const MIN_MOUSE_SPEED = 10; // minimum human-like speed
-  const MAX_DIRECTION_CHANGES = 2.0; // max angle changes per point
-  const MIN_DIRECTION_CHANGES = 0.1; // min angle changes (too smooth = bot)
+  const MIN_TYPING_INTERVAL = 35; //ms Minimum interval between keystrokes for human typing
+  const MIN_TYPING_DEVIATION = 50; //ms Minimum deviation for constant typing speed detection
+  const MAX_SCROLL_SPEED = 8000.0; //px/s
+  const MIN_SCROLLING_DEVIATION = 100; //px/s Minimum deviation for constant scrolling speed detection
   const MOUSE_SAMPLE_SIZE = 20; // number of points to analyze
-  const MIN_MOVEMENT_DISTANCE = 50; // minimum distance to consider for analysis
 
   // === Behavior logging ===
   let suspiciousCount = 0;
@@ -43,8 +38,6 @@
   let lastKeyTime = 0;
   let typingStartTime = 0;
   let totalTypedChars = 0;
-  let lastMouseEventTime = 0;
-  let lastMousePosition = { x: 0, y: 0 };
 
   // === Enhanced Mouse Tracking Data ===
   let mouseTrackingData = {
@@ -63,108 +56,7 @@
   let mousePauseStartTime = null;
   let mousePauseTimer = null;
 
-  // === Mouse Movement Analysis Functions ===
-  function calculateDistance(pos1, pos2) {
-    const dx = pos2.x - pos1.x;
-    const dy = pos2.y - pos1.y;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  function calculateDirection(pos1, pos2) {
-    const dx = pos2.x - pos1.x;
-    const dy = pos2.y - pos1.y;
-    return Math.atan2(dy, dx);
-  }
-
-  function calculateAcceleration() {
-    if (mousePositions.length < 3) return 0;
-
-    const len = mousePositions.length;
-    const p1 = mousePositions[len - 3];
-    const p2 = mousePositions[len - 2];
-    const p3 = mousePositions[len - 1];
-
-    const v1 = calculateDistance(p1, p2) / (p2.time - p1.time);
-    const v2 = calculateDistance(p2, p3) / (p3.time - p2.time);
-
-    return v2 - v1;
-  }
-
-  function calculateDirectionChange() {
-    if (mousePositions.length < 3) return 0;
-
-    const len = mousePositions.length;
-    const p1 = mousePositions[len - 3];
-    const p2 = mousePositions[len - 2];
-    const p3 = mousePositions[len - 1];
-
-    const dir1 = calculateDirection(p1, p2);
-    const dir2 = calculateDirection(p2, p3);
-
-    let change = Math.abs(dir2 - dir1);
-    if (change > Math.PI) change = 2 * Math.PI - change;
-
-    return change;
-  }
-
-  function scheduleMovementPause() {
-    clearTimeout(mousePauseTimer);
-    mousePauseTimer = setTimeout(() => {
-      if (isMouseMoving) {
-        isMouseMoving = false;
-        mousePauseStartTime = performance.now();
-      }
-    }, 100);
-  }
-
-  function analyzeTimingPatterns() {
-    const intervals = mouseTrackingData.movementIntervals;
-    if (intervals.length < 10) return false;
-
-    const mean =
-      intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
-    const variance =
-      intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-      intervals.length;
-    const cv = Math.sqrt(variance) / mean;
-
-    return cv < 0.15; // Too consistent timing
-  }
-
-  function analyzeMovementPatterns() {
-    const directions = mouseTrackingData.directionChanges;
-    if (directions.length < 5) return false;
-
-    const avgDirectionChange =
-      directions.reduce((sum, val) => sum + val, 0) / directions.length;
-    return avgDirectionChange < 0.1; // Too straight
-  }
-
-  function analyzeClickPatterns() {
-    const clickTimings = mouseTrackingData.clickTimings;
-    if (clickTimings.length < 3) return false;
-
-    const mean =
-      clickTimings.reduce((sum, val) => sum + val, 0) / clickTimings.length;
-    const variance =
-      clickTimings.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-      clickTimings.length;
-    const cv = Math.sqrt(variance) / mean;
-
-    const minClickInterval = Math.min(...clickTimings);
-
-    return cv < 0.2 || minClickInterval < 50;
-  }
-
-  function analyzeMicroMovements() {
-    if (mouseTrackingData.totalMovements < 20) return false;
-
-    const microMovementRatio =
-      mouseTrackingData.microMovements / mouseTrackingData.totalMovements;
-    return microMovementRatio < 0.02 || microMovementRatio > 0.25;
-  }
-
-  // Enhanced mouse movement behavior check
+  // === Mouse Movement Analysis ===
   function checkMouseMovementBehavior() {
     if (mousePositions.length < 5) return false;
 
@@ -193,35 +85,143 @@
     return isSuspicious;
   }
 
-  // Calculate typing irregularities
+  // helper function to analyze mouse timing patterns
+  function analyzeTimingPatterns() {
+    const intervals = mouseTrackingData.movementIntervals;
+    if (intervals.length < 10) return false;
+
+    // Calculate coefficient of variation (CV) for intervals
+    const mean =
+      intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
+    const variance =
+      intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      intervals.length;
+    const cv = Math.sqrt(variance) / mean;
+
+    return cv < 0.15; // Too consistent timing
+  }
+
+  // helper function to analyze mouse movement patterns
+  function analyzeMovementPatterns() {
+    const directions = mouseTrackingData.directionChanges;
+    if (directions.length < 5) return false;
+
+    const avgDirectionChange =
+      directions.reduce((sum, val) => sum + val, 0) / directions.length;
+    return avgDirectionChange < 0.1; // Too straight
+  }
+
+  // helper function to analyze click patterns
+  function analyzeClickPatterns() {
+    const clickTimings = mouseTrackingData.clickTimings;
+    if (clickTimings.length < 3) return false;
+
+    // Calculate coefficient of variation (CV) for click timings
+    const mean =
+      clickTimings.reduce((sum, val) => sum + val, 0) / clickTimings.length;
+    const variance =
+      clickTimings.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      clickTimings.length;
+    const cv = Math.sqrt(variance) / mean;
+
+    const minClickInterval = Math.min(...clickTimings);
+
+    return cv < 0.2 || minClickInterval < 50;
+  }
+
+  // helper function to analyze micro movements
+  function analyzeMicroMovements() {
+    if (mouseTrackingData.totalMovements < 20) return false;
+
+    const microMovementRatio =
+      mouseTrackingData.microMovements / mouseTrackingData.totalMovements;
+    return microMovementRatio < 0.02 || microMovementRatio > 0.25;
+  }
+
+  // === Typing Analysis ===
+  // Calculate intervals between consecutive keypresses
   function analyzeTyping() {
     if (keyPressTimes.length < 5) return false;
-    let irregularCount = 0;
+
+    const intervals = [];
+
+    // Calculate intervals between consecutive keypresses
     for (let i = 1; i < keyPressTimes.length; i++) {
       const diff = Math.abs(keyPressTimes[i] - keyPressTimes[i - 1]);
-      if (diff > 500) irregularCount++;
+      intervals.push(diff); // Store the interval
     }
-    const irregularRatio = irregularCount / (keyPressTimes.length - 1);
+
+    // Calculate the average interval between keypresses
     const avgInterval =
       keyPressTimes.reduce((a, b) => a + b, 0) / keyPressTimes.length;
+
+    // Calculate the standard deviation of the intervals
+    const stdDev = calculateStandardDeviation(intervals);
+
+    console.log(
+      "[Typing Analysis] Avg Interval:",
+      avgInterval,
+      "| Typing Deviation:",
+      stdDev
+    );
+
     return (
-      avgInterval < MIN_TYPING_INTERVAL ||
-      irregularRatio > 0.5 ||
-      avgInterval > MAX_TYPING_INTERVAL
+      avgInterval < MIN_TYPING_INTERVAL || // Typing too fast (human limit)
+      stdDev < MIN_TYPING_DEVIATION // Detect uniform typing speed (low variation between keystrokes)
     );
   }
 
-  // Analyze scrolling behavior
+  // Helper function to calculate the standard deviation of intervals
+  function calculateStandardDeviation(arr) {
+    const mean = arr.reduce((a, b) => a + b) / arr.length;
+    const squaredDiffs = arr.map((val) => Math.pow(val - mean, 2));
+    const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b) / arr.length;
+    return Math.sqrt(avgSquaredDiff);
+  }
+
+  // === Scrolling Analysis ===
   function analyzeScrolling() {
     if (scrollRecords.length < 3) return false;
+
     let totalScroll = 0;
     let totalTime = 0;
+    let scrollSpeeds = [];
+
+    // Calculate the scroll speed and store the intervals
     for (let i = 1; i < scrollRecords.length; i++) {
-      totalScroll += Math.abs(scrollRecords[i].y - scrollRecords[i - 1].y);
-      totalTime += scrollRecords[i].time - scrollRecords[i - 1].time;
+      const scrollDistance = Math.abs(
+        scrollRecords[i].y - scrollRecords[i - 1].y
+      );
+      const timeInterval = scrollRecords[i].time - scrollRecords[i - 1].time;
+
+      totalScroll += scrollDistance;
+      totalTime += timeInterval;
+
+      if (timeInterval > 0) {
+        scrollSpeeds.push(scrollDistance / timeInterval); // Store speed for std deviation calculation
+      }
     }
-    const speed = totalTime > 0 ? totalScroll / totalTime : 0;
-    return speed > MAX_SCROLL_SPEED;
+
+    speed = totalTime > 0 ? totalScroll / totalTime : 0;
+
+    // Calculate the standard deviation of the scroll speeds
+    const meanSpeed =
+      scrollSpeeds.reduce((sum, speed) => sum + speed, 0) / scrollSpeeds.length;
+    const squaredDiffs = scrollSpeeds.map((speed) =>
+      Math.pow(speed - meanSpeed, 2)
+    );
+    const variance =
+      squaredDiffs.reduce((sum, diff) => sum + diff, 0) / squaredDiffs.length;
+    const stdDev = Math.sqrt(variance) * 1000; // Convert to px/s
+
+    speed = speed * 1000; // Convert to px/s
+
+    // Detect uniform scrolling speed based on standard deviation
+    const isUniformScrolling = stdDev < MIN_SCROLLING_DEVIATION; // Adjust threshold for uniformity detection as needed
+
+    console.log("scrolling speed:", speed, "| Scroll Deviation:", stdDev);
+
+    return speed > MAX_SCROLL_SPEED || isUniformScrolling; // Consider uniform scrolling as suspicious
   }
 
   // Check for suspicious behavior based on mouse movement, typing, and scrolling
@@ -288,7 +288,6 @@
   }
 
   // === Event Listeners ===
-
   document.addEventListener("mousemove", (e) => {
     const now = Date.now();
 
@@ -358,8 +357,62 @@
     lastMouseEventTime = now;
     lastMousePosition = { x: e.clientX, y: e.clientY };
 
-    scheduleMovementPause();
+    // Schedule mouse movement pause detection
+    clearTimeout(mousePauseTimer);
+    mousePauseTimer = setTimeout(() => {
+      if (isMouseMoving) {
+        isMouseMoving = false;
+        mousePauseStartTime = performance.now();
+      }
+    }, 100);
   });
+
+  // Helper functions to calculate distance
+  function calculateDistance(pos1, pos2) {
+    const dx = pos2.x - pos1.x;
+    const dy = pos2.y - pos1.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Helper function to calculate direction between two points
+  function calculateDirection(pos1, pos2) {
+    const dx = pos2.x - pos1.x;
+    const dy = pos2.y - pos1.y;
+    return Math.atan2(dy, dx);
+  }
+
+  // helper functions for acceleration and direction change calculations
+  function calculateAcceleration() {
+    if (mousePositions.length < 3) return 0;
+
+    const len = mousePositions.length;
+    const p1 = mousePositions[len - 3];
+    const p2 = mousePositions[len - 2];
+    const p3 = mousePositions[len - 1];
+
+    const v1 = calculateDistance(p1, p2) / (p2.time - p1.time);
+    const v2 = calculateDistance(p2, p3) / (p3.time - p2.time);
+
+    return v2 - v1;
+  }
+
+  //helper function to calculate mouse direction change
+  function calculateDirectionChange() {
+    if (mousePositions.length < 3) return 0;
+
+    const len = mousePositions.length;
+    const p1 = mousePositions[len - 3];
+    const p2 = mousePositions[len - 2];
+    const p3 = mousePositions[len - 1];
+
+    const dir1 = calculateDirection(p1, p2);
+    const dir2 = calculateDirection(p2, p3);
+
+    let change = Math.abs(dir2 - dir1);
+    if (change > Math.PI) change = 2 * Math.PI - change;
+
+    return change;
+  }
 
   document.addEventListener("click", (e) => {
     const now = Date.now();

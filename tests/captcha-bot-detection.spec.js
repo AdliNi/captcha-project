@@ -16,9 +16,9 @@ test("captcha triggers on bot-like behavior", async () => {
   await page.goto("https://captcha-ex.rf.gd"); // Use your test page
 
   // Simulate bot-like behavior: single smooth linear mouse movement
-  await page.mouse.move(10, 100);
+  await page.mouse.move(10, 1000);
   await page.mouse.down();
-  await page.mouse.move(210, 100, { steps: 100 }); // Move horizontally in 100 steps
+  await page.mouse.move(210, 1000, { steps: 1000 }); // Move horizontally in 100 steps
   await page.mouse.up();
   await page.waitForTimeout(1000); // Wait for detection interval
 
@@ -28,12 +28,11 @@ test("captcha triggers on bot-like behavior", async () => {
   });
   expect(await modal.isVisible()).toBe(true);
 
-  // Example: Solve a text captcha
+  // Solve a text captcha
   const question = await page
     .locator("#captcha-modal .captcha-question")
     .innerText();
-  const answer = solveCaptcha(question); // You need to implement this function
-
+  const answer = solveCaptcha(question);
   await page.fill("#captcha-modal input[type='text']", answer);
   await page.click("#captcha-modal button[type='submit']");
 
