@@ -6,7 +6,13 @@ header("Access-Control-Allow-Origin: *");  // Allow cross-origin requests
 header("Access-Control-Allow-Methods: GET, POST");  // Allow specific HTTP methods
 header("Access-Control-Allow-Headers: Content-Type, Authorization");  // Allow specific headers
 
-$result = $conn->query("SELECT id, captcha_id, user_answer, time_taken_ms, mouse_path, created_at FROM text_logs ORDER BY created_at DESC LIMIT 20");
+header("Content-Type: application/json"); // REQUIRED for JSON responses
+
+// Update SQL to join with text_questions and get the question
+$result = $conn->query("SELECT l.id, l.captcha_id, q.question, l.user_answer, l.time_taken_ms, l.mouse_path, l.created_at
+FROM text_logs l
+LEFT JOIN text_questions q ON l.captcha_id = q.id
+ORDER BY l.created_at DESC LIMIT 20");
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +35,7 @@ $result = $conn->query("SELECT id, captcha_id, user_answer, time_taken_ms, mouse
     <thead>
       <tr>
         <th>ID</th>
+        <th>Question</th>
         <th>Answer</th>
         <th>Time Taken (ms)</th>
         <th>Date</th>
@@ -38,6 +45,7 @@ $result = $conn->query("SELECT id, captcha_id, user_answer, time_taken_ms, mouse
       <?php while ($row = $result->fetch_assoc()): ?>
         <tr data-mouse='<?php echo htmlspecialchars($row["mouse_path"]); ?>'>
           <td><?php echo $row["captcha_id"]; ?></td>
+          <td><?php echo htmlspecialchars($row["question"]); ?></td>
           <td><?php echo htmlspecialchars($row["user_answer"]); ?></td>
           <td><?php echo $row["time_taken_ms"]; ?></td>
           <td><?php echo $row["created_at"]; ?></td>
