@@ -48,7 +48,7 @@ ORDER BY l.created_at DESC LIMIT 20");
           <td><?php echo $row["captcha_id"]; ?></td>
           <td><?php echo htmlspecialchars($row["question"]); ?></td>
           <td><?php echo htmlspecialchars($row["user_answer"]); ?></td>
-          <td><?php echo isset($row["result"]) ? htmlspecialchars($row["result"]) : ""; ?></td>
+          <td><?php echo isset($row["result"]) === 'pass' ? 'Pass' : ($row['result'] === 'bot' ? 'BOT' : 'Fail'); ?></td>
           <td><?php echo isset($row["bot_reason"]) ? htmlspecialchars($row["bot_reason"]) : ""; ?></td>
           <td><?php echo $row["time_taken_ms"]; ?></td>
           <td><?php echo $row["created_at"]; ?></td>

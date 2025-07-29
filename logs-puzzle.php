@@ -69,9 +69,8 @@ if ($result && $result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
     $id = $row['id'];
     $time = $row['time_taken_ms'];
-    $resultText = $row['result'] === 'pass' ? 'Pass' : 'Fail';
+    $resultText = $row['result'] === 'pass' ? 'Pass' : ($row['result'] === 'bot' ? 'BOT' : 'Fail');
     $created = $row['created_at'];
-
     $submitted = htmlspecialchars($row['submitted_order']);
     $correct = htmlspecialchars($row['correct_order']);
     $mousePathRaw = $row['mouse_path'];
